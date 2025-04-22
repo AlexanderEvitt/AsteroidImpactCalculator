@@ -1,4 +1,6 @@
 function observations = unpack_MPC(filename)
+    % Reads MPC observation data
+    % https://www.minorplanetcenter.net/iau/info/OpticalObs.html
     % Read file
     lines = readlines(filename);
 

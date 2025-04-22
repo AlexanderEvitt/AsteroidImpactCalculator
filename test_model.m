@@ -49,7 +49,7 @@ ephemeris.jupiter = planetEphemeris(JDs,"SolarSystem","Jupiter","432t").';
 options = odeset('AbsTol',1e-14,'RelTol',1e-14);
 [~, traj] = ode45(@(t,y) solar_system_force_model(t,y,ephemeris), ts, X0, options);
 
-miss_distance = norm(traj(end,1:3) - ephemeris.earth(:,end))
+miss_distance = norm(traj(end,1:3) - ephemeris.earth(:,end).')
 
 %% Plot trajectory
 close all;
@@ -73,7 +73,7 @@ title("2024 YR4 Trajectory [17 Oct 2024 - 17 Oct 2032]")
 axis equal
 
 % Animated plot of markers
-for k = 1:10:n
+for k = 1:1:n
     pa.XData = traj(k,1);
     pa.YData = traj(k,2);
     pa.ZData = traj(k,3);
