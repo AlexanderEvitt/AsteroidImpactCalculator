@@ -1,5 +1,5 @@
 function dydt = solar_system_force_model(t,y,ephemeris)
-    % Get Julian date (time defined in julian seconds since 2000)
+    % Get Julian date (time defined in julian seconds since epoch)
     JD = juliandate(2024,10,17,0,0,0) + (t/86400);
     
     % Get positions of Venus, Earth, Mars, Jupiter, and Sun
@@ -14,6 +14,9 @@ function dydt = solar_system_force_model(t,y,ephemeris)
     % Add gravitational acceleration
     a = a + gravity(1.32724400e11,x-sun_pos);
     a = a + gravity(3.986004418e5,x-earth_pos);
+
+    % Add Yarkovsky effect
+    %a = a-(2e-12/1000)*v/norm(v); % empirical estimate
 
     % Pass to integrator
     dydt(1:3,1) = v;

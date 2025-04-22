@@ -11,24 +11,14 @@ argp = 134.64369;
 RAAN = 271.41255;
 M = 351.06547;
 n = 0.24389582;
-X0 = MPC_to_orbit(a,e,i,RAAN,argp,M,n);
 % From JPL Horizons
 a = 3.798426562794065e+08;
 e = 6.641400641819333e-01;
-i = 3.452785235470560;
-argp = 1.346422366023097e+2;
-RAAN = 2.714123388372419e+2;
-theta = 3.074395859965221e+2;
-[r, v] = orbital_elements_to_rv(a,e,i,RAAN,argp,theta,1.327124400189e11);
-X0 = [r;v];
-
-JPL_X0 = [1.490564028447319e8; -1.995902566836032e7; 1.210407097519749e6;
-    -9.096151730398509; 3.355424389651756e1; 1.400752719658557e1];
-
-X0 = JPL_X0;
+i = 
+X0 = MPC_to_orbit(a,e,i,RAAN,argp,M,n);
 
 % Times (epoch start to 2032 close approach)
-n = 5000;
+n = 100;
 JDi = juliandate(2024,10,17,0,0,0); % start date
 JDf = juliandate(2032,12,22,08,46,0); % end date
 span = (JDf - JDi)*86400; % time span in seconds
@@ -48,8 +38,6 @@ ephemeris.jupiter = planetEphemeris(JDs,"SolarSystem","Jupiter","432t").';
 % Numerically integrate with ode45
 options = odeset('AbsTol',1e-14,'RelTol',1e-14);
 [~, traj] = ode45(@(t,y) solar_system_force_model(t,y,ephemeris), ts, X0, options);
-
-miss_distance = norm(traj(end,1:3) - ephemeris.earth(:,end))
 
 %% Plot trajectory
 close all;
@@ -73,7 +61,7 @@ title("2024 YR4 Trajectory [17 Oct 2024 - 17 Oct 2032]")
 axis equal
 
 % Animated plot of markers
-for k = 1:10:n
+for k = 1:1:n
     pa.XData = traj(k,1);
     pa.YData = traj(k,2);
     pa.ZData = traj(k,3);
