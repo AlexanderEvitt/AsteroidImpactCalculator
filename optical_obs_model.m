@@ -2,19 +2,19 @@ function y = optical_obs_model(t,X,ephemeris)
     % Measurement model, converts time and state to azi,elev
     c = 299792.458;
 
-    % Get Julian date (time defined in julian seconds since 2000)
-    JD = juliandate(2000,1,1,0,0,0) + (t/86400);
+    % Get Julian date (time defined in julian seconds since epoch)
+    JD = juliandate(2024,10,17,0,0,0) + (t/86400);
 
     % RA and DEC are independent of observer position on Earth
     % Also independent of Earth rotation
     % All that matters is where Earth is (R)
-    R = unpack_ephemeris(ephemeris.dates,ephemeris.sun,JD);
+    R = unpack_ephemeris(ephemeris.dates,ephemeris.earth,JD);
 
     tau = 0;
     n = 5;
     for i = 1:n
         % Get body position using Keplerian approximation
-        Xt = central_force_motion(1.327124400189e11,X,-tau);
+        Xt = central_force_motion(ephemeris.mu_sun,X,-tau);
         r = Xt(1:3);
     
         % Iterate for light-time (assumed downlink)
@@ -22,7 +22,7 @@ function y = optical_obs_model(t,X,ephemeris)
     end
 
     % Model position of body at t - tau
-    Xt = central_force_motion(1.327124400189e11,X,-tau);
+    Xt = central_force_motion(ephemeris.mu_sun,X,-tau);
     r = Xt(1:3);
 
     % Convert barycentric to Earth-centered
