@@ -31,7 +31,7 @@ y = data(:,2:3);
 m = length(t);
 
 % Initial conditions
-% Perturb by 1 Earth-Moon dist and 0.1 km/s
+% Pertu
 theta = 33;
 phi = -72;
 dr = 384000*[cosd(theta)*sind(phi); sind(theta)*sind(phi); cosd(phi)];
@@ -39,7 +39,7 @@ theta = -5;
 phi = 123;
 dv = 0.1*[cosd(theta)*sind(phi); sind(theta)*sind(phi); cosd(phi)];
 dX = [dr;dv];
-X0 = true_X0 + dX;
+X0 = true_X0 + dX; % slightly perturb the known ephemeris to check convergence
 
 %% Carry out batch estimation
 clc;
@@ -90,6 +90,7 @@ legend("Nominal trajectory", "Observations")
 %% Plot residuals in each iteration
 
 figure(2)
+subplot(2,1,1)
 semilogy(1:iters, residuals(:,1))
 hold on
 semilogy(1:iters, residuals(:,2))
