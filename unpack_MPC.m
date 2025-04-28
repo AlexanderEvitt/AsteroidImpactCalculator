@@ -17,7 +17,7 @@ function observations = unpack_MPC(filename,start_epoch)
     observations = zeros(n,3);
 
     % Iterate and add to table
-    for l = 1:n-1
+    for l = 1:n
         % Get specific line in text
         line = char(lines(l));
 

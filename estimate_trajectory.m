@@ -13,7 +13,7 @@ JDs = JDi + (ts/86400);
 
 % Unpack data
 data = unpack_MPC("2024_YR4.txt",JDi);
-data = data(1:5:490,:); % remove NaNs that show up at the end
+data = data(1:8:490,:); % remove NaNs that show up at the end
 
 % Pack ephemeris data to struct
 ephemeris = pack_ephemeris(JDs);
@@ -32,21 +32,21 @@ y = data(:,2:3);
 m = length(t);
 
 % Initial conditions
-dX = 0.01*384*[1000;-2500;500;0.1;-0.2;0.01];
+dX = 0.000001*384*[1000;-2500;500;0.1;-0.2;0.01];
 X0 = true_X0 + dX; % slightly perturb the known ephemeris to check convergence
 
 %% Carry out batch estimation
 clc;
 sigma = 0.000277778;  % 1 arcsecond in radians
 R = (sigma^2)*eye(2);
-P = 1*diag(dX.^2);
+P = 0.0000001*diag(dX.^2);
 
 % Models
 F = @(t,y) solar_system_force_model(t,y,ephemeris,JDi);
 G = @(t,X) optical_obs_model(t,X,ephemeris,JDi);
 
 tic
-[new_X0,nominal,new_P0] = batch_estimate(F,G,t,y,P,R,30,X0,offset);
+[new_X0,nominal,new_P0] = batch_estimate(F,G,t,y,P,R,1,X0,offset);
 toc
 norm(dX(1:3))
 pos_err = norm(new_X0(1:3) - true_X0(1:3))
@@ -56,7 +56,7 @@ vel_err = norm(new_X0(4:6) - true_X0(4:6))
 close all;
 nominal_y = zeros(m-1,2);
 for i = 2:m
-    nominal_y(i-1,:) = optical_obs_model(t(i),nominal(:,i),ephemeris).';
+    nominal_y(i-1,:) = optical_obs_model(t(i),nominal(:,i),ephemeris,JDi).';
 end
 
 % Plot observations
