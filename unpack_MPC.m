@@ -17,7 +17,7 @@ function observations = unpack_MPC(filename,start_epoch)
     observations = zeros(n,3);
 
     % Iterate and add to table
-    for l = 1:n
+    for l = 1:n-1
         % Get specific line in text
         line = char(lines(l));
 
@@ -41,10 +41,12 @@ function observations = unpack_MPC(filename,start_epoch)
         dec.sec = str2double(line(52:56));
 
         % Get sign of degrees
-        if dec.deg == 0
+        if line(45) == "+"
             sign = 1;
+        elseif line(45) == "-"
+            sign = -1;
         else
-            sign = dec.deg/abs(dec.deg);
+            sign = 0; % set observation to zero if its bad
         end
 
         % Convert to degrees fully

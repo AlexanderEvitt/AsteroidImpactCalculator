@@ -28,7 +28,7 @@ ephemeris = pack_ephemeris(JDs);
 
 % Unpack data
 data = unpack_MPC("2024_YR4.txt",JDi);
-data = data(1:8:490,:); % remove NaNs that show up at the end
+data = data(1:1:490,:); % remove NaNs that show up at the end
 t = [data(:,1)];
 y = data(:,2:3);
 m = length(t);
@@ -41,15 +41,19 @@ toc
 
 %% Plot observations
 
-close all;
 nominal_y = zeros(n,2);
+traj = traj.';
 for i = 1:n
-    nominal_y(i,:) = optical_obs_model(ts(i),traj(i,:),ephemeris,JDi).';
+    nominal_y(i,:) = optical_obs_model(ts(i),traj(:,i),ephemeris,JDi).';
 end
 
 dist_to_earth = [];
 for i = 1:n
-    dist_to_earth(i) = norm(traj(i,1:3) - ephemeris.earth(:,i).');
+    r = traj(1:3,:);
+    R = ephemeris.earth(:,i);
+    r_ECI = r - R;
+    r_hat = r_ECI/norm(r_ECI);
+    dist_to_earth(i) = norm(r);
 end
 
 % Plot observations
@@ -75,38 +79,3 @@ subplot(3,1,3)
 plot(ts, dist_to_earth)
 xlabel("Time (s)")
 ylabel("Distance to Earth")
-
-
-%% Plot trajectory
-close all;
-figure(1)
-pa = plot3(traj(end,1),traj(end,2),traj(end,3),"ro","LineWidth",1);
-hold on
-plot3(traj(:,1),traj(:,2),traj(:,3),"r--","LineWidth",1)
-
-% Plot Earth and Sun
-pe = plot3(ephemeris.earth(1,end),ephemeris.earth(2,end),ephemeris.earth(3,end),"bo");
-plot3(ephemeris.earth(1,:),ephemeris.earth(2,:),ephemeris.earth(3,:),"b-")
-
-plot3(ephemeris.sun(1,1),ephemeris.sun(2,1),ephemeris.sun(3,1),"ko")
-
-xlabel("x (km)")
-ylabel("y (km)")
-zlabel("z (km)")
-
-legend("2024 YR4","2024 YR4 Trajectory","Earth","Earth Trajectory","Sun")
-title("2024 YR4 Trajectory [17 Oct 2024 - 23 Dec 2032]")
-axis equal
-
-% Animated plot of markers
-for k = n%1:10:n
-    pa.XData = traj(k,1);
-    pa.YData = traj(k,2);
-    pa.ZData = traj(k,3);
-
-    pe.XData = ephemeris.earth(1,k);
-    pe.YData = ephemeris.earth(2,k);
-    pe.ZData = ephemeris.earth(3,k);
-
-    drawnow
-end

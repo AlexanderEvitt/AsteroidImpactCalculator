@@ -7,7 +7,7 @@ function y = optical_obs_model(t,X,ephemeris,start_epoch)
 
     % RA and DEC are independent of observer position on Earth
     % Also independent of Earth rotation
-    % All that matters is where Earth is (R)
+    % All that matters is where Earth is (R) (3 x 1)
     R = unpack_ephemeris(ephemeris.dates,ephemeris.earth,JD);
 
     tau = 0;
@@ -15,7 +15,7 @@ function y = optical_obs_model(t,X,ephemeris,start_epoch)
     for i = 1:n
         % Get body position using Keplerian approximation
         Xt = central_force_motion(ephemeris.mu_sun,X,-tau);
-        r = Xt(1:3);
+        r = Xt(1:3,:);
     
         % Iterate for light-time (assumed downlink)
         tau = (1/c)*norm(r - R);
@@ -23,7 +23,7 @@ function y = optical_obs_model(t,X,ephemeris,start_epoch)
 
     % Model position of body at t - tau
     Xt = central_force_motion(ephemeris.mu_sun,X,-tau);
-    r = Xt(1:3);
+    r = Xt(1:3,:);
 
     % Convert barycentric to Earth-centered
     r_ECI = r - R;
@@ -42,13 +42,4 @@ function y = optical_obs_model(t,X,ephemeris,start_epoch)
     ra = rad2deg(ra);
     dec = rad2deg(dec);
     y = [ra; dec];
-end
-
-
-function pos = unpack_ephemeris(dates,ephemeris,JD)
-    % Returns position of body given date and ephemeris data
-    pos1 = interpn(dates.',ephemeris(1,:),JD, "spline");
-    pos2 = interpn(dates.',ephemeris(2,:),JD, "spline");
-    pos3 = interpn(dates.',ephemeris(3,:),JD, "spline");
-    pos = [pos1;pos2;pos3];
 end
