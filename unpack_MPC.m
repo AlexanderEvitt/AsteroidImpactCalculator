@@ -1,4 +1,4 @@
-function observations = unpack_MPC(filename)
+function observations = unpack_MPC(filename,start_epoch)
     % Reads MPC observation data
     % https://www.minorplanetcenter.net/iau/info/OpticalObs.html
     % Read file
@@ -25,7 +25,7 @@ function observations = unpack_MPC(filename)
         year = str2double(line(16:19));
         month = str2double(line(21:22));
         day = str2double(line(24:32));
-        JD = juliandate(year,month,day) - juliandate(2024,10,17,0,0,0);
+        JD = juliandate(year,month,day) - start_epoch; % time since epoch
         t = JD*86400 + 32.184 + 37; % seconds since 17 Oct 2024 (epoch from MPC)
 
         % Process right ascension

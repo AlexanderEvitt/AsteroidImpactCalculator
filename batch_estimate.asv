@@ -46,6 +46,10 @@ function [X0, nominal, P0] = batch_estimate(F,G,t,Y,P,R,iters,X0,offset)
             Phis(:,:,i) = reshape(Yout(i,n+1:end), n, n);
         end
 
+        Phis(:,:,end)
+        diff = Phis(:,:,1)*X0
+        sols(end,:).'
+
         % Integrate through trajectory with measurements
         for i = 1+offset:m
             % Integrate nominal trajectory
@@ -75,7 +79,6 @@ function [X0, nominal, P0] = batch_estimate(F,G,t,Y,P,R,iters,X0,offset)
         % Shift
         apriori = true;
         x0 = x0 - xhat;
-        k/iters % print progress
     end
 
     P0 = inv(Lambda);

@@ -1,9 +1,9 @@
-function y = optical_obs_model(t,X,ephemeris)
+function y = optical_obs_model(t,X,ephemeris,start_epoch)
     % Measurement model, converts time and state to azi,elev
     c = 299792.458;
 
     % Get Julian date (time defined in julian seconds since epoch)
-    JD = juliandate(2024,10,17,0,0,0) + (t/86400);
+    JD = start_epoch + (t/86400);
 
     % RA and DEC are independent of observer position on Earth
     % Also independent of Earth rotation

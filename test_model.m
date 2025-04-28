@@ -1,18 +1,6 @@
 clear; clc; close all;
 
-data = unpack_MPC("2024_YR4.txt");
-
-% Ephemeris 2024 YR4 at JD TT = 2460600.5
-% From MPC
-a = 2.5370741*1.495978707e8;
-e = 0.6638562;
-i = 3.45180;
-argp = 134.64369;
-RAAN = 271.41255;
-M = 351.06547;
-n = 0.24389582;
-X0 = MPC_to_orbit(a,e,i,RAAN,argp,M,n);
-% From JPL Horizons
+% Initial conditions from JPL Horizons
 a = 3.798426562794065e+08;
 e = 6.641400641819333e-01;
 i = 3.452785235470560;
@@ -32,17 +20,17 @@ n = 5000;
 JDi = juliandate(2024,10,17,0,0,0); % start date
 JDf = juliandate(2032,12,23,0,0,0); % end date
 span = (JDf - JDi)*86400; % time span in seconds
-%span = 60*86400;
 ts = linspace(0,span,n).';
 JDs = JDi + (ts/86400);
 
 % Pack ephemeris data to struct
 ephemeris = pack_ephemeris(JDs);
 
-
 % Numerically integrate with ode45
-options = odeset('AbsTol',1e-14,'RelTol',1e-14);
-[~, traj] = ode45(@(t,y) solar_system_force_model(t,y,ephemeris), ts, X0, options);
+tic
+options = odeset('AbsTol',1e-2,'RelTol',1e-10);
+[~, traj] = ode45(@(t,y) solar_system_force_model(t,y,ephemeris,JDi), ts, X0, options);
+toc
 
 %% Plot trajectory
 close all;
@@ -62,7 +50,7 @@ ylabel("y (km)")
 zlabel("z (km)")
 
 legend("2024 YR4","2024 YR4 Trajectory","Earth","Earth Trajectory","Sun")
-title("2024 YR4 Trajectory [17 Oct 2024 - 17 Oct 2032]")
+title("2024 YR4 Trajectory [17 Oct 2024 - 23 Dec 2032]")
 axis equal
 
 % Animated plot of markers

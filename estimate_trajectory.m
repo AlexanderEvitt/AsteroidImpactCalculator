@@ -2,30 +2,23 @@
 % Alexander Evitt
 clear; clc; close all;
 
-data = unpack_MPC("2024_YR4.txt");
-data = data(1:490,:); % remove NaNs that show up at the end
-
 % Times (epoch start to 2032 close approach)
 n = 5000;
-JDi = juliandate(2024,10,17,0,0,0); % start date
-JDf = juliandate(2032,12,23,0,0,0); % end date
+JDi = juliandate(2024,12,25,0,0,0); % start date
+JDf = juliandate(2028,12,23,0,0,0); % end date
 span = (JDf - JDi)*86400; % time span in seconds
 %span = 60*86400;
 ts = linspace(0,span,n).';
 JDs = JDi + (ts/86400);
 
+% Unpack data
+data = unpack_MPC("2024_YR4.txt",JDi);
+data = data(1:5:490,:); % remove NaNs that show up at the end
+
 % Pack ephemeris data to struct
 ephemeris = pack_ephemeris(JDs);
 
 % Ephemeris 2024 YR4 at JD TT = 2460600.5
-a = 2.5370741*1.495978707e8;
-e = 0.6638562;
-i = 3.45180;
-argp = 134.64369;
-RAAN = 271.41255;
-M = 351.06547;
-n = 0.24389582;
-true_X0 = MPC_to_orbit(a,e,i,RAAN,argp,M,n);
 JPL_X0 = [1.490564028447319e8; -1.995902566836032e7; 1.210407097519749e6;
     -9.096151730398509; 3.355424389651756e1; 1.400752719658557e1];
 
@@ -33,26 +26,28 @@ true_X0 = JPL_X0;
 
 
 %%
+offset = 1;
 t = [0;data(:,1)];
 y = data(:,2:3);
-n = 2;
 m = length(t);
 
 % Initial conditions
-dX = 0.1*384*[1000;-2500;500;0.1;-0.2;0.01];
+dX = 0.01*384*[1000;-2500;500;0.1;-0.2;0.01];
 X0 = true_X0 + dX; % slightly perturb the known ephemeris to check convergence
 
 %% Carry out batch estimation
 clc;
-R = 0.01*eye(2);
-P = diag(dX).^2;
+sigma = 0.000277778;  % 1 arcsecond in radians
+R = (sigma^2)*eye(2);
+P = 1*diag(dX.^2);
 
 % Models
-F = @(t,y) solar_system_force_model(t,y,ephemeris);
-G = @(t,X) optical_obs_model(t,X,ephemeris);
+F = @(t,y) solar_system_force_model(t,y,ephemeris,JDi);
+G = @(t,X) optical_obs_model(t,X,ephemeris,JDi);
 
-
-[new_X0,nominal,new_P0] = batch_estimate(F,G,t,y,P,R,2,X0,1);
+tic
+[new_X0,nominal,new_P0] = batch_estimate(F,G,t,y,P,R,30,X0,offset);
+toc
 norm(dX(1:3))
 pos_err = norm(new_X0(1:3) - true_X0(1:3))
 vel_err = norm(new_X0(4:6) - true_X0(4:6))

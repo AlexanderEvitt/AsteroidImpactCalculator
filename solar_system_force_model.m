@@ -1,6 +1,6 @@
-function dydt = solar_system_force_model(t,y,ephemeris)
+function dydt = solar_system_force_model(t,y,ephemeris,start_epoch)
     % Get Julian date (time defined in julian seconds since epoch)
-    JD = juliandate(2024,10,17,0,0,0) + (t/86400);
+    JD = start_epoch + (t/86400);
     
     % Get positions of Venus, Earth, Mars, Jupiter, and Sun
     sun_pos = unpack_ephemeris(ephemeris.dates,ephemeris.sun,JD);
@@ -24,10 +24,10 @@ function dydt = solar_system_force_model(t,y,ephemeris)
     a = a + gravity(ephemeris.mu_jupiter,x-jupiter_pos);
 
     % Add relativistic corrections for each body
-    r = x - sun_pos;
-    er = r/norm(r);
-    ev = v/norm(v);
-    c = 299792.458;
+    %r = x - sun_pos;
+    %er = r/norm(r);
+    %ev = v/norm(v);
+    %c = 299792.458;
     %a = a + (ephemeris.mu_sun/(norm(r)^2))*((4*(ephemeris.mu_sun/(norm(r)*c^2)) - ((norm(v)^2)/(c^2)))*er + 4*((norm(v)^2)/(c^2))*dot(er,ev)*ev);
 
 
@@ -39,15 +39,14 @@ function dydt = solar_system_force_model(t,y,ephemeris)
     dydt(4:6,1) = a;
 end
 
-function acc = gravity(mu,r)
-    % Returns gravity in km/s^2
-    acc = (-mu/(norm(r)^3))*r;
+function acc = gravity(mu, r)
+    r2 = dot(r, r);          % r squared (no sqrt)
+    r3 = r2 * sqrt(r2);      % r cubed (1 sqrt + 1 multiply)
+    acc = -(mu / r3) * r;
 end
 
-function pos = unpack_ephemeris(dates,ephemeris,JD)
+function pos = unpack_ephemeris(dates, ephemeris, JD)
     % Returns position of body given date and ephemeris data
-    pos1 = interpn(dates.',ephemeris(1,:),JD, "spline");
-    pos2 = interpn(dates.',ephemeris(2,:),JD, "spline");
-    pos3 = interpn(dates.',ephemeris(3,:),JD, "spline");
-    pos = [pos1;pos2;pos3];
+    % Vectorized spline interpolation for all three components at once
+    pos = interp1(dates.', ephemeris.', JD, 'spline').';
 end
