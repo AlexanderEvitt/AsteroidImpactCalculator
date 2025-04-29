@@ -53,7 +53,7 @@ for i = 1:n
     R = ephemeris.earth(:,i);
     r_ECI = r - R;
     r_hat = r_ECI/norm(r_ECI);
-    dist_to_earth(i) = norm(r);
+    dist_to_earth(i) = norm(r_ECI);
 end
 
 % Plot observations

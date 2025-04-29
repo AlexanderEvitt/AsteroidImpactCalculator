@@ -1,14 +1,6 @@
 clear; clc; close all;
 
 % Initial conditions from JPL Horizons
-a = 3.798426562794065e+08;
-e = 6.641400641819333e-01;
-i = 3.452785235470560;
-argp = 1.346422366023097e+2;
-RAAN = 2.714123388372419e+2;
-theta = 3.074395859965221e+2;
-[r, v] = orbital_elements_to_rv(a,e,i,RAAN,argp,theta,1.327124400189e11);
-X0 = [r;v];
 
 JPL_X0 = [1.490564028447319e8; -1.995902566836032e7; 1.210407097519749e6;
     -9.096151730398509; 3.355424389651756e1; 1.400752719658557e1];
@@ -69,12 +61,12 @@ end
 %% Minimum distance
 
 j = n;
-tq = linspace(ts(n-2),ts(n),1000);
+tq = linspace(ts(n-2),ts(n),10000);
 rs_ast = interpn(ts,traj(:,1:3),tq);
 rs_ear = interpn(ts,ephemeris.earth(:,:).',tq);
 
 dists = [];
-for i = 1:1000
+for i = 1:length(tq)
     dists(i) = norm(rs_ast(:,i) - rs_ear(:,i));
 end
 

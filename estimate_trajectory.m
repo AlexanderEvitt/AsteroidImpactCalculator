@@ -7,13 +7,13 @@ n = 5000;
 JDi = juliandate(2024,12,25,0,0,0); % start date
 JDf = juliandate(2025,12,23,0,0,0); % end date
 span = (JDf - JDi)*86400; % time span in seconds
-%span = 60*86400;
 ts = linspace(0,span,n).';
 JDs = JDi + (ts/86400);
 
 % Unpack data
 data = unpack_MPC("2024_YR4.txt",JDi);
-data = data(1:1:493,:); % remove NaNs that show up at the end
+fin = 417; % 493 for all, 417 for max collision
+data = data(1:1:fin,:); % remove NaNs that show up at the end
 
 % Pack ephemeris data to struct
 ephemeris = pack_ephemeris(JDs);
